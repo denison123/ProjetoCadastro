@@ -338,7 +338,7 @@ app.post('/api/linhas', upload.single('termo_pdf'), async (req, res) => {
 // INICIALIZAÇÃO DO SERVIDOR NA REDE
 // ==========================================
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // O IP '0.0.0.0' permite conexões de qualquer máquina da rede local
 app.listen(PORT, '0.0.0.0', () => {
