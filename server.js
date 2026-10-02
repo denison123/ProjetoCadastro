@@ -246,7 +246,6 @@ app.get('/api/dashboard/estatisticas', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 // --- ROTA DO RELATÓRIO DE AUDITORIA COMPILADO POR USUÁRIO ---
 app.get('/api/relatorio/auditoria', async (req, res) => {
   try {
@@ -254,6 +253,7 @@ app.get('/api/relatorio/auditoria', async (req, res) => {
       SELECT 
         u.id AS usuario_id,
         u.nome AS usuario_nome,
+        u.cargo,
         u.matricula,
         d.nome AS departamento,
         COALESCE(
@@ -278,7 +278,7 @@ app.get('/api/relatorio/auditoria', async (req, res) => {
       LEFT JOIN equipamento_usuarios eu ON eu.usuario_id = u.id
       LEFT JOIN equipamentos e ON e.id = eu.equipamento_id
       LEFT JOIN linhas_telefonicas l ON l.usuario_id = u.id
-      GROUP BY u.id, u.nome, u.matricula, d.nome
+      GROUP BY u.id, u.nome, u.cargo, u.matricula, d.nome
       ORDER BY u.nome ASC;
     `;
     const result = await pool.query(query);
