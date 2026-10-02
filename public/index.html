@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Inventário de TI..</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen p-6">
+    <div class="max-w-6xl mx-auto space-y-6">
+
+        <!-- Cabeçalho -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">Sistema de Inventário de TI</h1>
+                <div class="flex space-x-2">
+                    <button onclick="switchTab('dashboard')" id="tab-dashboard"
+                        class="py-2 px-4 font-semibold rounded-md bg-indigo-600 text-white">Dashboard</button>
+                    <button onclick="switchTab('usuarios')" id="tab-usuarios"
+                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">Usuários</button>
+                    <button onclick="switchTab('equipamentos')" id="tab-equipamentos"
+                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">Equipamentos</button>
+                    <button onclick="switchTab('linhas')" id="tab-linhas"
+                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">Linhas
+                        Telefônicas</button>
+                    <button onclick="switchTab('ajuda')" id="tab-ajuda"
+                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">📖 Ajuda /
+                        Documentação</button>
+                </div>
+            </div>
+
+            <!-- DASHBOARD -->
+            <div id="secao-dashboard" class="mt-6 space-y-6">
+                <div class="flex justify-end pt-2">
+                    <button onclick="baixarRelatorioAuditoria()"
+                        class="bg-slate-800 text-white px-4 py-2 rounded-md hover:bg-slate-900 font-semibold text-sm flex items-center gap-2">
+                        📊 Exportar Relatório de Auditoria (CSV/Excel)
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-blue-600 uppercase">Total Equipamentos</p>
+                        <p id="kpi-total-eq" class="text-3xl font-extrabold text-blue-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-green-600 uppercase">Equipamentos em Uso</p>
+                        <p id="kpi-em-uso" class="text-3xl font-extrabold text-green-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-amber-600 uppercase">Em Estoque / Livres</p>
+                        <p id="kpi-estoque" class="text-3xl font-extrabold text-amber-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-purple-600 uppercase">Total Usuários</p>
+                        <p id="kpi-total-usr" class="text-3xl font-extrabold text-purple-900 mt-1">0</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <h3 class="text-md font-semibold text-gray-700 mb-3 text-center">Distribuição por Categoria</h3>
+                        <div class="h-64 flex justify-center items-center">
+                            <canvas id="chartTipos"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <h3 class="text-md font-semibold text-gray-700 mb-3 text-center">Status de Alocação</h3>
+                        <div class="h-64 flex justify-center items-center">
+                            <canvas id="chartStatus"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border-t pt-4">
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-indigo-600 uppercase">Total de Smartphones</p>
+                        <p id="kpi-total-smartphones" class="text-3xl font-extrabold text-indigo-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-teal-600 uppercase">Total de Linhas Corporativas</p>
+                        <p id="kpi-total-linhas" class="text-3xl font-extrabold text-teal-900 mt-1">0</p>
+                    </div>
+                    <div class="bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded shadow-sm">
+                        <p class="text-xs font-bold text-emerald-600 uppercase">Linhas Ativas em Uso</p>
+                        <p id="kpi-linhas-em-uso" class="text-3xl font-extrabold text-emerald-900 mt-1">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORMULÁRIO DE USUÁRIOS -->
+            <div id="secao-usuarios" class="mt-6 hidden">
+                <h2 class="text-lg font-bold text-gray-700 mb-4">Cadastrar Novo Usuário</h2>
+                <form id="form-usuarios" onsubmit="salvarUsuario(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="usr_nome" required class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">E-mail</label>
+                        <input type="email" id="usr_email" required class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Cargo</label>
+                        <input type="text" id="usr_cargo" required class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Matrícula</label>
+                        <input type="text" id="usr_matricula" required class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Departamento</label>
+                        <select id="usr_dep_id" required class="mt-1 w-full p-2 border rounded-md bg-white">
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Localidade</label>
+                        <input type="text" id="usr_localidade" value="Belem" required
+                            class="mt-1 w-full p-2 border rounded-md">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit"
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-semibold">Cadastrar
+                            Usuário</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FORMULÁRIO DE EQUIPAMENTOS / APARELHOS -->
+            <div id="secao-equipamentos" class="mt-6 hidden">
+                <h2 class="text-lg font-bold text-gray-700 mb-4">Cadastrar Novo Equipamento / Aparelho</h2>
+                <form id="form-equipamentos" onsubmit="salvarEquipamento(event)" class="space-y-4">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Nº Patrimônio / Hostname</label>
+                            <input type="text" id="eq_patrimonio" placeholder="Ex: PAT-10203" required
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Número de Série</label>
+                            <input type="text" id="eq_serie" placeholder="Ex: 2RLBX3" required
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Categoria</label>
+                            <select id="eq_categoria_id" required class="mt-1 w-full p-2 border rounded-md bg-white">
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status do Equipamento</label>
+                            <select id="eq_status" onchange="tratarMudancaStatus()" required
+                                class="mt-1 w-full p-2 border rounded-md bg-white font-semibold text-gray-700">
+                                <option value="Em Uso">Em Uso</option>
+                                <option value="Em Manutenção">Em Manutenção</option>
+                                <option value="Backup">Backup</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Marca</label>
+                            <input type="text" id="eq_marca" placeholder="Ex: Dell, Samsung, Apple, Motorola, LG"
+                                required class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Modelo</label>
+                            <input type="text" id="eq_modelo" placeholder="Ex: Galaxy A34, Latitude 5330" required
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+
+                    <!-- CAMPOS EXCLUSIVOS DE SMARTPHONES / CELULARES -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-3 rounded-md border">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">IMEI 1 (Para Celulares /
+                                Smartphones)</label>
+                            <input type="text" id="eq_imei1" placeholder="Ex: 356789012345678"
+                                class="mt-1 w-full p-2 border rounded-md bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">IMEI 2 (Opcional)</label>
+                            <input type="text" id="eq_imei2" placeholder="Ex: 356789012345679"
+                                class="mt-1 w-full p-2 border rounded-md bg-white">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 whitespace-nowrap">
+                                Usuários Responsáveis <span id="label_obrigatorio"
+                                    class="text-red-500 font-bold">*</span>
+                            </label>
+
+                            <!-- Caixinha retrátil para seleção rápida -->
+                            <div class="mt-1 border rounded-md bg-white p-2 space-y-2 max-h-40 overflow-y-auto"
+                                id="container_usuarios">
+                                <input type="text" id="busca_usuario_input" oninput="filtrarCheckboxUsuarios()"
+                                    placeholder="🔍 Buscar usuário..." class="w-full p-1 border rounded text-xs mb-1">
+                                <div id="lista_checkboxes_usuarios" class="space-y-1">
+                                    <span class="text-xs text-gray-400 italic">Carregando...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Especificações (Opcional)</label>
+                            <input type="text" id="eq_especificacoes" placeholder="Ex: Core i7, 128GB Storage"
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Periféricos (Acessórios)</label>
+                            <input type="text" id="eq_perifericos"
+                                placeholder="Ex: Monitor, Teclado, Mouse, Carregador, Capa"
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                    </div>
+
+                    <!-- UPLOAD DE PDF DO TERMO DO EQUIPAMENTO -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Termo de Responsabilidade do Equipamento
+                            (PDF)</label>
+                        <input type="file" id="eq_termo_pdf" accept="application/pdf"
+                            class="mt-1 w-full p-2 border rounded-md bg-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                    </div>
+
+                    <div>
+                        <button type="submit"
+                            class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 font-semibold mt-2">
+                            Cadastrar Equipamento
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FORMULÁRIO DE LINHAS TELEFÔNICAS -->
+            <div id="secao-linhas" class="mt-6 hidden">
+                <h2 class="text-lg font-bold text-gray-700 mb-4">Cadastrar Linha Telefônica Corporativa</h2>
+                <form id="form-linhas" onsubmit="salvarLinha(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Número da Linha (DDD +
+                                Número)</label>
+                            <input type="text" id="lin_numero" placeholder="Ex: (91) 98888-7777" required
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Operadora</label>
+                            <input type="text" id="lin_operadora" placeholder="Ex: Vivo, Claro, TIM" required
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">ICCID / Número do Chip</label>
+                            <input type="text" id="lin_iccid" placeholder="8955..."
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Plano</label>
+                            <input type="text" id="lin_plano" placeholder="Ex: 50GB Corporativo Unlimited"
+                                class="mt-1 w-full p-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Usuário Responsável</label>
+                            <select id="lin_usuario_id" class="mt-1 w-full p-2 border rounded-md bg-white">
+                                <option value="">Carregando...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <select id="lin_status" class="mt-1 w-full p-2 border rounded-md bg-white">
+                                <option value="Em Uso">Em Uso</option>
+                                <option value="Estoque">Em Estoque / Livre</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Termo de Responsabilidade da Linha
+                            (PDF)</label>
+                        <input type="file" id="lin_termo_pdf" accept="application/pdf"
+                            class="mt-1 w-full p-2 border rounded-md bg-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 font-semibold">
+                        Cadastrar Linha
+                    </button>
+                </form>
+            </div>
+
+            <!-- SEÇÃO DE AJUDA / DOCUMENTAÇÃO -->
+            <!-- SEÇÃO DE AJUDA / DOCUMENTAÇÃO -->
+            <div id="secao-ajuda" class="mt-6 hidden bg-white rounded-lg p-6 space-y-6">
+                <div class="border-b pb-3">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        📖 Guia de Usabilidade e Fluxo do Sistema
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Manual prático de operação e regras de negócio do
+                        Inventário de TI voltada para Camilla.Pereira e Maria.Souza</p>
+                </div>
+
+                <!-- Visão Geral -->
+                <div class="space-y-2">
+                    <h3 class="text-md font-bold text-indigo-700">📌 Visão Geral do Sistema</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        O <strong>Sistema de Inventário de TI</strong> é uma plataforma centralizada projetada para
+                        gerenciar os colaboradores da empresa, seus respectivos equipamentos (computadores,
+                        smartphones, periféricos) e linhas telefônicas corporativas, além do controle dos termos de
+                        responsabilidade assinados.
+                    </p>
+                </div>
+
+                <!-- Estrutura de Navegação -->
+                <div class="space-y-2">
+                    <h3 class="text-md font-bold text-indigo-700">🗂️ Menu de Navegação</h3>
+                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                        <li><strong>Dashboard:</strong> Indicadores de ativos em uso/estoque, novos KPIs de telefonia
+                            corporativa e gráficos por categoria.</li>
+                        <li><strong>Usuários:</strong> Cadastro e consulta da lista geral de funcionários.</li>
+                        <li><strong>Equipamentos:</strong> Gerenciamento de ativos (PCs, celulares, periféricos),
+                            vinculação de múltiplos responsáveis e termos em PDF.</li>
+                        <li><strong>Linhas Telefônicas:</strong> Controle de chips (ICCID), planos corporativos, vinculo
+                            com usuários e termos em PDF.</li>
+                    </ul>
+                </div>
+
+                <!-- Fluxo Operacional Passo a Passo -->
+                <div class="space-y-3">
+                    <h3 class="text-md font-bold text-indigo-700">🚀 Fluxo Operacional Passo a Passo</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="border p-3 rounded-md bg-gray-50">
+                            <span class="font-bold text-blue-600 block mb-1">1. Cadastrar Usuários</span>
+                            <p class="text-gray-600">Acesse a aba <em>Usuários</em> para registrar os funcionários.
+                                Eles ficarão disponíveis para vinculação imediata nos formulários de Equipamentos e
+                                Linhas.</p>
+                        </div>
+
+                        <div class="border p-3 rounded-md bg-gray-50">
+                            <span class="font-bold text-green-600 block mb-1">2. Cadastrar Equipamentos e
+                                Smartphones</span>
+                            <p class="text-gray-600">Na aba <em>Equipamentos</em>, informe patrimônio, nº de série e
+                                IMEIs (se for celular). É possível selecionar **um ou mais usuários responsáveis**
+                                através da lista rápida com busca por nome.</p>
+                        </div>
+
+                        <div class="border p-3 rounded-md bg-gray-50">
+                            <span class="font-bold text-purple-600 block mb-1">3. Cadastrar Linhas Telefônicas</span>
+                            <p class="text-gray-600">Na aba <em>Linhas Telefônicas</em>, registre o número com DDD,
+                                operadora, plano, ICCID do chip e o usuário atribuído. Lembre-se de anexar o Termo em
+                                PDF assinado.</p>
+                        </div>
+
+                        <div class="border p-3 rounded-md bg-gray-50">
+                            <span class="font-bold text-amber-600 block mb-1">4. Consultar e Exportar Auditoria</span>
+                            <p class="text-gray-600">Utilize a barra de pesquisa em tempo real presente em todas as
+                                tabelas. No <em>Dashboard</em>, clique em <strong>Exportar Relatório de
+                                    Auditoria</strong> para baixar o consolidado de ativos e responsáveis em CSV/Excel.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regras de Negócio -->
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded text-sm text-amber-900 space-y-1">
+                    <p class="font-bold">⚠️ Regras de Negócio Importantes:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Status "Em Uso" (Equipamentos):</strong> Exige a marcação obrigatória de pelo menos
+                            um Usuário Responsável para garantir a rastreabilidade.</li>
+                        <li><strong>Múltiplos Responsáveis:</strong> Equipamentos podem ter mais de um colaborador
+                            vinculado. O envio é processado via JSON para a API.</li>
+                        <li><strong>Estoque / Manutenção / Backup:</strong> Equipamentos nestes status liberam a
+                            obrigatoriedade de vinculação a usuários e atualizam os KPIs de disponibilidade no
+                            Dashboard.</li>
+                        <li><strong>Documentação em PDF:</strong> Arquivos salvos nos formulários aparecem diretamente
+                            nas tabelas de Equipamentos e Linhas através do botão <em>📎 Ver Termo</em>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- TABELAS -->
+            <div id="card-tabela" class="bg-white rounded-lg shadow-md p-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                    <h2 id="titulo-tabela" class="text-xl font-bold text-gray-800">Usuários Cadastrados</h2>
+                    <div class="w-full md:w-80">
+                        <input type="text" id="campo-busca" oninput="filtrarTabela()"
+                            placeholder="🔍 Pesquisar em tempo real..." class="w-full p-2 border rounded-md text-sm">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <!-- Tabela Usuários -->
+                    <table id="tabela-usuarios" class="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="bg-gray-100 border-b">
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">ID</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Nome</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Matrícula</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Cargo</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Departamento</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Localidade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-usuarios" class="divide-y divide-gray-200"></tbody>
+                    </table>
+
+                    <!-- Tabela Equipamentos -->
+                    <table id="tabela-equipamentos" class="w-full text-left border-collapse min-w-[900px] hidden">
+                        <thead>
+                            <tr class="bg-gray-100 border-b">
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">ID</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Patrimônio /
+                                    Hostname</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Nº Série</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Marca / Modelo
+                                </th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Categoria</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600">Periféricos</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Responsável</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Status</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Termo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-equipamentos" class="divide-y divide-gray-200"></tbody>
+                    </table>
+
+                    <!-- Tabela Linhas Telefônicas -->
+                    <table id="tabela-linhas" class="w-full text-left border-collapse min-w-[800px] hidden">
+                        <thead>
+                            <tr class="bg-gray-100 border-b">
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">ID</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Número</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Operadora</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">ICCID / Chip</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Plano</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Responsável</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Status</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Termo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-linhas" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            let abaAtual = 'dashboard';
+            let chartTiposInstance = null;
+            let chartStatusInstance = null;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                carregarDashboard();
+                carregarDepartamentos();
+                carregarCategorias();
+                carregarUsuarios();
+                carregarEquipamentos();
+                carregarLinhas();
+                tratarMudancaStatus();
+            });
+
+            async function carregarDashboard() {
+                try {
+                    const res = await fetch('/api/dashboard/estatisticas');
+                    const data = await res.json();
+
+                    document.getElementById('kpi-total-eq').innerText = data.totalEquipamentos;
+                    document.getElementById('kpi-em-uso').innerText = data.equipamentosEmUso;
+                    document.getElementById('kpi-estoque').innerText = data.equipamentosEmEstoque;
+                    document.getElementById('kpi-total-usr').innerText = data.totalUsuarios;
+
+                    // Atualiza os novos indicadores de telefonia
+                    document.getElementById('kpi-total-smartphones').innerText = data.totalSmartphones || 0;
+                    document.getElementById('kpi-total-linhas').innerText = data.totalLinhas || 0;
+                    document.getElementById('kpi-linhas-em-uso').innerText = data.linhasEmUso || 0;
+
+                    const tiposLabels = data.porTipo.map(item => item.tipo || 'Sem Categoria');
+                    const tiposValores = data.porTipo.map(item => parseInt(item.quantidade));
+
+                    if (chartTiposInstance) chartTiposInstance.destroy();
+                    const ctxTipos = document.getElementById('chartTipos').getContext('2d');
+                    chartTiposInstance = new Chart(ctxTipos, {
+                        type: 'bar',
+                        data: {
+                            labels: tiposLabels,
+                            datasets: [{ label: 'Quantidade', data: tiposValores, backgroundColor: '#3B82F6' }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    });
+
+                    if (chartStatusInstance) chartStatusInstance.destroy();
+                    const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+                    chartStatusInstance = new Chart(ctxStatus, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Em Uso', 'Em Estoque'],
+                            datasets: [{ data: [data.equipamentosEmUso, data.equipamentosEmEstoque], backgroundColor: ['#10B981', '#F59E0B'] }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+
+                } catch (err) { console.error('Erro ao carregar o dashboard:', err); }
+            }
+
+            async function carregarCategorias() {
+                try {
+                    const res = await fetch('/api/categorias');
+                    const cats = await res.json();
+                    const select = document.getElementById('eq_categoria_id');
+                    select.innerHTML = '<option value="">Selecione uma categoria</option>';
+                    cats.forEach(c => {
+                        select.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+                    });
+                } catch (err) { console.error(err); }
+            }
+
+            async function carregarDepartamentos() {
+                try {
+                    const res = await fetch('/api/departamentos');
+                    const dps = await res.json();
+                    const select = document.getElementById('usr_dep_id');
+                    select.innerHTML = '<option value="">Selecione um departamento</option>';
+                    dps.forEach(d => {
+                        select.innerHTML += `<option value="${d.id}">${d.nome}</option>`;
+                    });
+                } catch (err) { console.error(err); }
+            }
+
+            async function carregarUsuarios() {
+                try {
+                    const res = await fetch('/api/usuarios');
+                    const usuarios = await res.json();
+
+                    const containerUsuarios = document.getElementById('lista_checkboxes_usuarios');
+                    const selectLin = document.getElementById('lin_usuario_id');
+
+                    containerUsuarios.innerHTML = '';
+                    selectLin.innerHTML = '<option value="">Nenhum (Em estoque)</option>';
+
+                    usuarios.forEach(u => {
+                        containerUsuarios.innerHTML += `
+                            <label class="flex items-center space-x-2 text-xs text-gray-700 hover:bg-gray-50 p-1 rounded cursor-pointer item-usuario-checkbox">
+                                <input type="checkbox" name="usuarios_equipamento" value="${u.id}" class="rounded text-green-600 focus:ring-green-500">
+                                <span>${u.nome}</span>
+                            </label>
+                        `;
+                        selectLin.innerHTML += `<option value="${u.id}">${u.nome}</option>`;
+                    });
+
+                    const tbody = document.getElementById('tbody-usuarios');
+                    tbody.innerHTML = '';
+                    usuarios.forEach(u => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-gray-50 linha-registro">
+                              <td class="p-3 text-sm font-bold text-gray-700">${u.id}</td>
+                              <td class="p-3 text-sm text-gray-800">${u.nome}</td>
+                              <td class="p-3 text-sm text-gray-600">${u.matricula}</td>
+                              <td class="p-3 text-sm text-gray-600">${u.cargo}</td>
+                              <td class="p-3 text-sm text-gray-600">${u.departamento_nome || 'N/A'}</td>
+                              <td class="p-3 text-sm text-gray-600">${u.localidade}</td>
+                            </tr>`;
+                    });
+                } catch (err) { console.error(err); }
+            }
+
+            function filtrarCheckboxUsuarios() {
+                const termo = document.getElementById('busca_usuario_input').value.toLowerCase();
+                const itens = document.querySelectorAll('.item-usuario-checkbox');
+
+                itens.forEach(item => {
+                    const nome = item.innerText.toLowerCase();
+                    item.classList.toggle('hidden', !nome.includes(termo));
+                });
+            }
+
+            async function carregarEquipamentos() {
+                try {
+                    const res = await fetch('/api/equipamentos');
+                    const equipamentos = await res.json();
+
+                    const tbody = document.getElementById('tbody-equipamentos');
+                    if (!tbody) return;
+
+                    tbody.innerHTML = '';
+
+                    if (!Array.isArray(equipamentos) || equipamentos.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="9" class="p-4 text-center text-gray-500 italic">Nenhum equipamento encontrado.</td>
+                            </tr>`;
+                        return;
+                    }
+
+                    equipamentos.forEach(eq => {
+                        const responsavel = (eq.usuario_nome && eq.usuario_nome !== '' && eq.usuario_nome !== 'Em Estoque')
+                            ? eq.usuario_nome
+                            : '<span class="italic text-gray-400">Em Estoque</span>';
+
+                        const termoBtn = eq.termo_url
+                            ? `<a href="${eq.termo_url}" target="_blank" rel="noopener noreferrer" class="text-xs bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold">📎 Ver Termo</a>`
+                            : `<span class="text-gray-400 italic text-xs">Sem termo</span>`;
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-gray-50 linha-registro">
+                                <td class="p-3 text-sm font-bold text-gray-700 whitespace-nowrap">${eq.id}</td>
+                                <td class="p-3 text-sm text-gray-800 font-semibold whitespace-nowrap">${eq.numero_patrimonio}</td>
+                                <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${eq.numero_serie}</td>
+                                <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${eq.marca} ${eq.modelo}</td>
+                                <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${eq.categoria_nome || '-'}</td>
+                                <td class="p-3 text-sm text-gray-600">${eq.perifericos || '-'}</td>
+                                <td class="p-3 text-sm text-gray-600">${responsavel}</td>
+                                <td class="p-3 text-sm whitespace-nowrap">${eq.status}</td>
+                                <td class="p-3 text-sm whitespace-nowrap">${termoBtn}</td>
+                            </tr>
+                        `;
+                    });
+                } catch (err) {
+                    console.error('Erro ao renderizar equipamentos:', err);
+                }
+            }
+
+            async function carregarLinhas() {
+                try {
+                    const res = await fetch('/api/linhas');
+                    const linhas = await res.json();
+                    const tbody = document.getElementById('tbody-linhas');
+                    tbody.innerHTML = '';
+
+                    if (!Array.isArray(linhas) || linhas.length === 0) {
+                        tbody.innerHTML = `
+                        <tr>
+                          <td colspan="8" class="p-4 text-center text-gray-500 italic">Nenhuma linha telefônica encontrada.</td>
+                        </tr>`;
+                        return;
+                    }
+
+                    linhas.forEach(l => {
+                        const responsavel = l.usuario_nome ? l.usuario_nome : '<span class="text-gray-400 italic">Em Estoque</span>';
+                        let statusClass = 'bg-green-100 text-green-800';
+                        if (l.status === 'Cancelada') statusClass = 'bg-red-100 text-red-800';
+                        if (l.status === 'Estoque') statusClass = 'bg-amber-100 text-amber-800';
+
+                        const termoBtn = l.termo_url
+                            ? `<a href="${l.termo_url}" target="_blank" rel="noopener noreferrer" class="text-xs bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold">📎 Ver Termo</a>`
+                            : `<span class="text-gray-400 italic text-xs">Sem termo</span>`;
+
+                        tbody.innerHTML += `
+                        <tr class="hover:bg-gray-50 linha-registro">
+                          <td class="p-3 text-sm font-bold text-gray-700 whitespace-nowrap">${l.id}</td>
+                          <td class="p-3 text-sm text-gray-800 font-semibold whitespace-nowrap">${l.numero_linha}</td>
+                          <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${l.operadora}</td>
+                          <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${l.iccid_chip || '-'}</td>
+                          <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${l.plano || '-'}</td>
+                          <td class="p-3 text-sm text-gray-600 whitespace-nowrap">${responsavel}</td>
+                          <td class="p-3 text-sm whitespace-nowrap">
+                            <span class="inline-block px-2.5 py-1 ${statusClass} rounded-full text-xs font-semibold whitespace-nowrap">
+                              ${l.status}
+                            </span>
+                          </td>
+                          <td class="p-3 text-sm whitespace-nowrap">${termoBtn}</td>
+                        </tr>
+                      `;
+                    });
+                } catch (err) {
+                    console.error('Erro ao carregar linhas:', err);
+                }
+            }
+
+            function switchTab(tab) {
+                abaAtual = tab;
+
+                const secDash = document.getElementById('secao-dashboard');
+                const secUsr = document.getElementById('secao-usuarios');
+                const secEq = document.getElementById('secao-equipamentos');
+                const secLin = document.getElementById('secao-linhas');
+                const secAjuda = document.getElementById('secao-ajuda');
+                const cardTab = document.getElementById('card-tabela');
+
+                const tabDashBtn = document.getElementById('tab-dashboard');
+                const tabUsrBtn = document.getElementById('tab-usuarios');
+                const tabEqBtn = document.getElementById('tab-equipamentos');
+                const tabLinBtn = document.getElementById('tab-linhas');
+                const tabAjudaBtn = document.getElementById('tab-ajuda');
+
+                const tabUsr = document.getElementById('tabela-usuarios');
+                const tabEq = document.getElementById('tabela-equipamentos');
+                const tabLin = document.getElementById('tabela-linhas');
+                const tituloTabela = document.getElementById('titulo-tabela');
+
+                [tabDashBtn, tabUsrBtn, tabEqBtn, tabLinBtn, tabAjudaBtn].forEach(b => {
+                    if (b) b.className = "py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100";
+                });
+
+                secDash.classList.add('hidden');
+                secUsr.classList.add('hidden');
+                secEq.classList.add('hidden');
+                secLin.classList.add('hidden');
+                if (secAjuda) secAjuda.classList.add('hidden');
+
+                if (tab === 'dashboard') {
+                    secDash.classList.remove('hidden');
+                    cardTab.classList.add('hidden');
+                    tabDashBtn.className = "py-2 px-4 font-semibold rounded-md bg-indigo-600 text-white";
+                    carregarDashboard();
+                } else if (tab === 'usuarios') {
+                    secUsr.classList.remove('hidden');
+                    cardTab.classList.remove('hidden');
+                    tabUsr.classList.remove('hidden');
+                    tabEq.classList.add('hidden');
+                    tabLin.classList.add('hidden');
+                    tituloTabela.innerText = 'Usuários Cadastrados';
+                    tabUsrBtn.className = "py-2 px-4 font-semibold rounded-md bg-blue-600 text-white";
+                } else if (tab === 'equipamentos') {
+                    secEq.classList.remove('hidden');
+                    cardTab.classList.remove('hidden');
+                    tabUsr.classList.add('hidden');
+                    tabEq.classList.remove('hidden');
+                    tabLin.classList.add('hidden');
+                    tituloTabela.innerText = 'Equipamentos Cadastrados';
+                    tabEqBtn.className = "py-2 px-4 font-semibold rounded-md bg-green-600 text-white";
+                } else if (tab === 'linhas') {
+                    secLin.classList.remove('hidden');
+                    cardTab.classList.remove('hidden');
+                    tabUsr.classList.add('hidden');
+                    tabEq.classList.add('hidden');
+                    tabLin.classList.remove('hidden');
+                    tituloTabela.innerText = 'Linhas Telefônicas Cadastradas';
+                    tabLinBtn.className = "py-2 px-4 font-semibold rounded-md bg-purple-600 text-white";
+                } else if (tab === 'ajuda') {
+                    if (secAjuda) secAjuda.classList.remove('hidden');
+                    cardTab.classList.add('hidden');
+                    tabAjudaBtn.className = "py-2 px-4 font-semibold rounded-md bg-slate-800 text-white";
+                }
+            }
+
+            function filtrarTabela() {
+                const termo = document.getElementById('campo-busca').value.toLowerCase();
+                let tabelaAtivaId = 'tbody-usuarios';
+                if (abaAtual === 'equipamentos') tabelaAtivaId = 'tbody-equipamentos';
+                if (abaAtual === 'linhas') tabelaAtivaId = 'tbody-linhas';
+
+                const linhas = document.querySelectorAll(`#${tabelaAtivaId} .linha-registro`);
+
+                linhas.forEach(linha => {
+                    const texto = linha.innerText.toLowerCase();
+                    linha.classList.toggle('hidden', !texto.includes(termo));
+                });
+            }
+
+            function tratarMudancaStatus() {
+                const statusSelect = document.getElementById('eq_status');
+                const labelObrigatorio = document.getElementById('label_obrigatorio');
+                const campoUsuarioSelect = document.getElementById('eq_usuario_id');
+
+                if (!statusSelect) return;
+
+                if (statusSelect.value === 'Em Uso') {
+                    if (labelObrigatorio) labelObrigatorio.classList.remove('hidden');
+                    if (campoUsuarioSelect) campoUsuarioSelect.setAttribute('required', 'required');
+                } else {
+                    if (labelObrigatorio) labelObrigatorio.classList.add('hidden');
+                    if (campoUsuarioSelect) campoUsuarioSelect.removeAttribute('required');
+                }
+            }
+
+            async function salvarEquipamento(e) {
+                e.preventDefault();
+
+                const status = document.getElementById('eq_status').value;
+
+                const checkboxes = document.querySelectorAll('input[name="usuarios_equipamento"]:checked');
+                const usuariosIds = Array.from(checkboxes).map(cb => cb.value);
+
+                if (status === 'Em Uso' && usuariosIds.length === 0) {
+                    alert('Atenção: Equipamentos com status "Em Uso" devem ser obrigatoriamente vinculados a pelo menos um Usuário!');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('numero_patrimonio', document.getElementById('eq_patrimonio').value);
+                formData.append('numero_serie', document.getElementById('eq_serie').value);
+                formData.append('categoria_id', document.getElementById('eq_categoria_id').value);
+                formData.append('marca', document.getElementById('eq_marca').value);
+                formData.append('modelo', document.getElementById('eq_modelo').value);
+                formData.append('imei_1', document.getElementById('eq_imei1').value || '');
+                formData.append('imei_2', document.getElementById('eq_imei2').value || '');
+                formData.append('especificacoes', document.getElementById('eq_especificacoes').value || '');
+                formData.append('perifericos', document.getElementById('eq_perifericos').value || '');
+                formData.append('status', status);
+
+                formData.append('usuarios_ids', JSON.stringify(usuariosIds));
+
+                const pdfInput = document.getElementById('eq_termo_pdf');
+                if (pdfInput && pdfInput.files[0]) {
+                    formData.append('termo_pdf', pdfInput.files[0]);
+                }
+
+                try {
+                    const res = await fetch('/api/equipamentos', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('Equipamento cadastrado com sucesso!');
+
+                        e.target.reset();
+                        checkboxes.forEach(cb => cb.checked = false);
+
+                        if (typeof tratarMudancaStatus === 'function') {
+                            tratarMudancaStatus();
+                        }
+                        carregarEquipamentos();
+                    } else {
+                        alert('Erro ao cadastrar: ' + data.error);
+                    }
+                } catch (err) {
+                    console.error('Erro na requisição:', err);
+                    alert('Erro ao conectar com o servidor.');
+                }
+            }
+
+            async function salvarUsuario(e) {
+                e.preventDefault();
+                const payload = {
+                    nome: document.getElementById('usr_nome').value,
+                    email: document.getElementById('usr_email').value,
+                    cargo: document.getElementById('usr_cargo').value,
+                    matricula: document.getElementById('usr_matricula').value,
+                    departamento_id: parseInt(document.getElementById('usr_dep_id').value),
+                    localidade: document.getElementById('usr_localidade').value,
+                    status: 'Ativo'
+                };
+
+                const res = await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Usuário cadastrado com sucesso!');
+                    e.target.reset();
+                    carregarUsuarios();
+                } else {
+                    alert('Erro ao cadastrar: ' + data.error);
+                }
+            }
+
+            async function salvarLinha(e) {
+                e.preventDefault();
+
+                const formData = new FormData();
+                formData.append('numero_linha', document.getElementById('lin_numero').value);
+                formData.append('operadora', document.getElementById('lin_operadora').value);
+                formData.append('iccid_chip', document.getElementById('lin_iccid').value);
+                formData.append('plano', document.getElementById('lin_plano').value);
+                formData.append('status', document.getElementById('lin_status').value);
+                formData.append('usuario_id', document.getElementById('lin_usuario_id').value || '');
+
+                const pdfInput = document.getElementById('lin_termo_pdf');
+                if (pdfInput.files[0]) {
+                    formData.append('termo_pdf', pdfInput.files[0]);
+                }
+
+                try {
+                    const res = await fetch('/api/linhas', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('Linha telefônica cadastrada com sucesso!');
+                        e.target.reset();
+                        carregarLinhas();
+                    } else {
+                        alert('Erro: ' + data.error);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            async function baixarRelatorioAuditoria() {
+                try {
+                    const res = await fetch('/api/relatorio/auditoria');
+                    const dados = await res.json();
+
+                    // 1. Valida se o backend retornou erro ou uma estrutura diferente de Array
+                    if (!res.ok || !Array.isArray(dados)) {
+                        throw new Error(dados.error || dados.message || 'A resposta do servidor não é uma lista válida.');
+                    }
+
+                    if (dados.length === 0) {
+                        alert('Nenhum dado encontrado para gerar o relatório.');
+                        return;
+                    }
+
+                    // \uFEFF adiciona a assinatura UTF-8 para o Excel abrir com acentuação correta
+                    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                    csvContent += "ID Usuario;Nome Usuario;Matricula;Departamento;Qtd Equipamentos;Qtd Linhas;Equipamentos Associados;Linhas Associadas\n";
+
+                    dados.forEach(u => {
+                        // 2. Garante que equipamentos e linhas são Arrays válidos mesmo se vierem undefined do backend
+                        const equipamentos = Array.isArray(u.equipamentos) ? u.equipamentos : [];
+                        const linhas = Array.isArray(u.linhas) ? u.linhas : [];
+
+                        const eqStr = equipamentos.map(e => `${e.patrimonio || e.numero_patrimonio || ''} (${e.modelo || ''})`).join(" | ");
+                        const linStr = linhas.map(l => `${l.numero || l.numero_linha || ''} (${l.operadora || ''})`).join(" | ");
+
+                        const linha = [
+                            u.usuario_id || u.id || '',
+                            `"${u.usuario_nome || u.nome || ''}"`,
+                            `"${u.matricula || ''}"`,
+                            `"${u.departamento || u.departamento_nome || ''}"`,
+                            equipamentos.length,
+                            linhas.length,
+                            `"${eqStr}"`,
+                            `"${linStr}"`
+                        ].join(";");
+
+                        csvContent += linha + "\n";
+                    });
+
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", `auditoria_inventario_${new Date().toISOString().slice(0, 10)}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                } catch (err) {
+                    console.error('Erro detalhado:', err);
+                    alert('Erro ao gerar relatório: ' + err.message);
+                }
+            }
+
+
+
+
+
+        </script>
+</body>
+
+</html>
