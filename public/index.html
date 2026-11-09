@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Inventário de TI..</title>
+    <title>Sistema de Inventário de TI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -24,11 +24,9 @@
                     <button onclick="switchTab('equipamentos')" id="tab-equipamentos"
                         class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">Equipamentos</button>
                     <button onclick="switchTab('linhas')" id="tab-linhas"
-                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">Linhas
-                        Telefônicas</button>
+                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">Linhas Telefônicas</button>
                     <button onclick="switchTab('ajuda')" id="tab-ajuda"
-                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">📖 Ajuda /
-                        Documentação</button>
+                        class="py-2 px-4 font-semibold rounded-md text-gray-600 hover:bg-gray-100">📖 Ajuda / Documentação</button>
                 </div>
             </div>
 
@@ -123,8 +121,7 @@
                     </div>
                     <div class="md:col-span-2">
                         <button type="submit"
-                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-semibold">Cadastrar
-                            Usuário</button>
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-semibold">Cadastrar Usuário</button>
                     </div>
                 </form>
             </div>
@@ -175,8 +172,7 @@
                     <!-- CAMPOS EXCLUSIVOS DE SMARTPHONES / CELULARES -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-3 rounded-md border">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">IMEI 1 (Para Celulares /
-                                Smartphones)</label>
+                            <label class="block text-sm font-medium text-gray-700">IMEI 1 (Para Celulares / Smartphones)</label>
                             <input type="text" id="eq_imei1" placeholder="Ex: 356789012345678"
                                 class="mt-1 w-full p-2 border rounded-md bg-white">
                         </div>
@@ -217,12 +213,11 @@
                         </div>
                     </div>
 
-                    <!-- UPLOAD DE PDF DO TERMO DO EQUIPAMENTO -->
+                    <!-- CAMPO DE LINK PARA O TERMO DO EQUIPAMENTO -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Termo de Responsabilidade do Equipamento
-                            (PDF)</label>
-                        <input type="file" id="eq_termo_pdf" accept="application/pdf"
-                            class="mt-1 w-full p-2 border rounded-md bg-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                        <label class="block text-sm font-medium text-gray-700">Link do Termo de Responsabilidade (Drive / Nuvem)</label>
+                        <input type="url" id="eq_termo_url" placeholder="https://drive.google.com/file/d/..."
+                            class="mt-1 w-full p-2 border rounded-md bg-white text-sm">
                     </div>
 
                     <div>
@@ -240,8 +235,7 @@
                 <form id="form-linhas" onsubmit="salvarLinha(event)" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700">Número da Linha (DDD +
-                                Número)</label>
+                            <label class="block text-sm font-medium text-gray-700">Número da Linha (DDD + Número)</label>
                             <input type="text" id="lin_numero" placeholder="Ex: (91) 98888-7777" required
                                 class="mt-1 w-full p-2 border rounded-md">
                         </div>
@@ -276,11 +270,11 @@
                         </div>
                     </div>
 
+                    <!-- CAMPO DE LINK PARA O TERMO DA LINHA -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Termo de Responsabilidade da Linha
-                            (PDF)</label>
-                        <input type="file" id="lin_termo_pdf" accept="application/pdf"
-                            class="mt-1 w-full p-2 border rounded-md bg-white text-sm file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                        <label class="block text-sm font-medium text-gray-700">Link do Termo de Responsabilidade (Drive / Nuvem)</label>
+                        <input type="url" id="lin_termo_url" placeholder="https://drive.google.com/file/d/..."
+                            class="mt-1 w-full p-2 border rounded-md bg-white text-sm">
                     </div>
 
                     <button type="submit"
@@ -291,92 +285,19 @@
             </div>
 
             <!-- SEÇÃO DE AJUDA / DOCUMENTAÇÃO -->
-            <!-- SEÇÃO DE AJUDA / DOCUMENTAÇÃO -->
             <div id="secao-ajuda" class="mt-6 hidden bg-white rounded-lg p-6 space-y-6">
                 <div class="border-b pb-3">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
                         📖 Guia de Usabilidade e Fluxo do Sistema
                     </h2>
-                    <p class="text-sm text-gray-500 mt-1">Manual prático de operação e regras de negócio do
-                        Inventário de TI voltada para Camilla.Pereira e Maria.Souza</p>
+                    <p class="text-sm text-gray-500 mt-1">Manual prático de operação e regras de negócio do Inventário de TI</p>
                 </div>
 
-                <!-- Visão Geral -->
                 <div class="space-y-2">
                     <h3 class="text-md font-bold text-indigo-700">📌 Visão Geral do Sistema</h3>
                     <p class="text-sm text-gray-600 leading-relaxed">
-                        O <strong>Sistema de Inventário de TI</strong> é uma plataforma centralizada projetada para
-                        gerenciar os colaboradores da empresa, seus respectivos equipamentos (computadores,
-                        smartphones, periféricos) e linhas telefônicas corporativas, além do controle dos termos de
-                        responsabilidade assinados.
+                        O <strong>Sistema de Inventário de TI</strong> gerencia colaboradores, ativos de hardware e linhas telefônicas corporativas no servidor 10.64.10.100.
                     </p>
-                </div>
-
-                <!-- Estrutura de Navegação -->
-                <div class="space-y-2">
-                    <h3 class="text-md font-bold text-indigo-700">🗂️ Menu de Navegação</h3>
-                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                        <li><strong>Dashboard:</strong> Indicadores de ativos em uso/estoque, novos KPIs de telefonia
-                            corporativa e gráficos por categoria.</li>
-                        <li><strong>Usuários:</strong> Cadastro e consulta da lista geral de funcionários.</li>
-                        <li><strong>Equipamentos:</strong> Gerenciamento de ativos (PCs, celulares, periféricos),
-                            vinculação de múltiplos responsáveis e termos em PDF.</li>
-                        <li><strong>Linhas Telefônicas:</strong> Controle de chips (ICCID), planos corporativos, vinculo
-                            com usuários e termos em PDF.</li>
-                    </ul>
-                </div>
-
-                <!-- Fluxo Operacional Passo a Passo -->
-                <div class="space-y-3">
-                    <h3 class="text-md font-bold text-indigo-700">🚀 Fluxo Operacional Passo a Passo</h3>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="border p-3 rounded-md bg-gray-50">
-                            <span class="font-bold text-blue-600 block mb-1">1. Cadastrar Usuários</span>
-                            <p class="text-gray-600">Acesse a aba <em>Usuários</em> para registrar os funcionários.
-                                Eles ficarão disponíveis para vinculação imediata nos formulários de Equipamentos e
-                                Linhas.</p>
-                        </div>
-
-                        <div class="border p-3 rounded-md bg-gray-50">
-                            <span class="font-bold text-green-600 block mb-1">2. Cadastrar Equipamentos e
-                                Smartphones</span>
-                            <p class="text-gray-600">Na aba <em>Equipamentos</em>, informe patrimônio, nº de série e
-                                IMEIs (se for celular). É possível selecionar **um ou mais usuários responsáveis**
-                                através da lista rápida com busca por nome.</p>
-                        </div>
-
-                        <div class="border p-3 rounded-md bg-gray-50">
-                            <span class="font-bold text-purple-600 block mb-1">3. Cadastrar Linhas Telefônicas</span>
-                            <p class="text-gray-600">Na aba <em>Linhas Telefônicas</em>, registre o número com DDD,
-                                operadora, plano, ICCID do chip e o usuário atribuído. Lembre-se de anexar o Termo em
-                                PDF assinado.</p>
-                        </div>
-
-                        <div class="border p-3 rounded-md bg-gray-50">
-                            <span class="font-bold text-amber-600 block mb-1">4. Consultar e Exportar Auditoria</span>
-                            <p class="text-gray-600">Utilize a barra de pesquisa em tempo real presente em todas as
-                                tabelas. No <em>Dashboard</em>, clique em <strong>Exportar Relatório de
-                                    Auditoria</strong> para baixar o consolidado de ativos e responsáveis em CSV/Excel.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Regras de Negócio -->
-                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded text-sm text-amber-900 space-y-1">
-                    <p class="font-bold">⚠️ Regras de Negócio Importantes:</p>
-                    <ul class="list-disc pl-5 space-y-1">
-                        <li><strong>Status "Em Uso" (Equipamentos):</strong> Exige a marcação obrigatória de pelo menos
-                            um Usuário Responsável para garantir a rastreabilidade.</li>
-                        <li><strong>Múltiplos Responsáveis:</strong> Equipamentos podem ter mais de um colaborador
-                            vinculado. O envio é processado via JSON para a API.</li>
-                        <li><strong>Estoque / Manutenção / Backup:</strong> Equipamentos nestes status liberam a
-                            obrigatoriedade de vinculação a usuários e atualizam os KPIs de disponibilidade no
-                            Dashboard.</li>
-                        <li><strong>Documentação em PDF:</strong> Arquivos salvos nos formulários aparecem diretamente
-                            nas tabelas de Equipamentos e Linhas através do botão <em>📎 Ver Termo</em>.</li>
-                    </ul>
                 </div>
             </div>
 
@@ -411,11 +332,9 @@
                         <thead>
                             <tr class="bg-gray-100 border-b">
                                 <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">ID</th>
-                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Patrimônio /
-                                    Hostname</th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Patrimônio / Hostname</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Nº Série</th>
-                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Marca / Modelo
-                                </th>
+                                <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Marca / Modelo</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Categoria</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600">Periféricos</th>
                                 <th class="p-3 text-sm font-semibold text-gray-600 whitespace-nowrap">Responsável</th>
@@ -472,7 +391,6 @@
                     document.getElementById('kpi-estoque').innerText = data.equipamentosEmEstoque;
                     document.getElementById('kpi-total-usr').innerText = data.totalUsuarios;
 
-                    // Atualiza os novos indicadores de telefonia
                     document.getElementById('kpi-total-smartphones').innerText = data.totalSmartphones || 0;
                     document.getElementById('kpi-total-linhas').innerText = data.totalLinhas || 0;
                     document.getElementById('kpi-linhas-em-uso').innerText = data.linhasEmUso || 0;
@@ -569,7 +487,6 @@
             function filtrarCheckboxUsuarios() {
                 const termo = document.getElementById('busca_usuario_input').value.toLowerCase();
                 const itens = document.querySelectorAll('.item-usuario-checkbox');
-
                 itens.forEach(item => {
                     const nome = item.innerText.toLowerCase();
                     item.classList.toggle('hidden', !nome.includes(termo));
@@ -580,17 +497,12 @@
                 try {
                     const res = await fetch('/api/equipamentos');
                     const equipamentos = await res.json();
-
                     const tbody = document.getElementById('tbody-equipamentos');
                     if (!tbody) return;
 
                     tbody.innerHTML = '';
-
                     if (!Array.isArray(equipamentos) || equipamentos.length === 0) {
-                        tbody.innerHTML = `
-                            <tr>
-                                <td colspan="9" class="p-4 text-center text-gray-500 italic">Nenhum equipamento encontrado.</td>
-                            </tr>`;
+                        tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-gray-500 italic">Nenhum equipamento encontrado.</td></tr>`;
                         return;
                     }
 
@@ -600,7 +512,7 @@
                             : '<span class="italic text-gray-400">Em Estoque</span>';
 
                         const termoBtn = eq.termo_url
-                            ? `<a href="${eq.termo_url}" target="_blank" rel="noopener noreferrer" class="text-xs bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold">📎 Ver Termo</a>`
+                            ? `<a href="${eq.termo_url}" target="_blank" rel="noopener noreferrer" class="text-xs bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold">🔗 Ver Termo</a>`
                             : `<span class="text-gray-400 italic text-xs">Sem termo</span>`;
 
                         tbody.innerHTML += `
@@ -630,10 +542,7 @@
                     tbody.innerHTML = '';
 
                     if (!Array.isArray(linhas) || linhas.length === 0) {
-                        tbody.innerHTML = `
-                        <tr>
-                          <td colspan="8" class="p-4 text-center text-gray-500 italic">Nenhuma linha telefônica encontrada.</td>
-                        </tr>`;
+                        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-gray-500 italic">Nenhuma linha telefônica encontrada.</td></tr>`;
                         return;
                     }
 
@@ -644,7 +553,7 @@
                         if (l.status === 'Estoque') statusClass = 'bg-amber-100 text-amber-800';
 
                         const termoBtn = l.termo_url
-                            ? `<a href="${l.termo_url}" target="_blank" rel="noopener noreferrer" class="text-xs bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold">📎 Ver Termo</a>`
+                            ? `<a href="${l.termo_url}" target="_blank" rel="noopener noreferrer" class="text-xs bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 px-2 py-1 rounded inline-flex items-center gap-1 font-semibold">🔗 Ver Termo</a>`
                             : `<span class="text-gray-400 italic text-xs">Sem termo</span>`;
 
                         tbody.innerHTML += `
@@ -671,7 +580,6 @@
 
             function switchTab(tab) {
                 abaAtual = tab;
-
                 const secDash = document.getElementById('secao-dashboard');
                 const secUsr = document.getElementById('secao-usuarios');
                 const secEq = document.getElementById('secao-equipamentos');
@@ -743,7 +651,6 @@
                 if (abaAtual === 'linhas') tabelaAtivaId = 'tbody-linhas';
 
                 const linhas = document.querySelectorAll(`#${tabelaAtivaId} .linha-registro`);
-
                 linhas.forEach(linha => {
                     const texto = linha.innerText.toLowerCase();
                     linha.classList.toggle('hidden', !texto.includes(termo));
@@ -753,24 +660,18 @@
             function tratarMudancaStatus() {
                 const statusSelect = document.getElementById('eq_status');
                 const labelObrigatorio = document.getElementById('label_obrigatorio');
-                const campoUsuarioSelect = document.getElementById('eq_usuario_id');
-
                 if (!statusSelect) return;
 
                 if (statusSelect.value === 'Em Uso') {
                     if (labelObrigatorio) labelObrigatorio.classList.remove('hidden');
-                    if (campoUsuarioSelect) campoUsuarioSelect.setAttribute('required', 'required');
                 } else {
                     if (labelObrigatorio) labelObrigatorio.classList.add('hidden');
-                    if (campoUsuarioSelect) campoUsuarioSelect.removeAttribute('required');
                 }
             }
 
             async function salvarEquipamento(e) {
                 e.preventDefault();
-
                 const status = document.getElementById('eq_status').value;
-
                 const checkboxes = document.querySelectorAll('input[name="usuarios_equipamento"]:checked');
                 const usuariosIds = Array.from(checkboxes).map(cb => cb.value);
 
@@ -779,41 +680,33 @@
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('numero_patrimonio', document.getElementById('eq_patrimonio').value);
-                formData.append('numero_serie', document.getElementById('eq_serie').value);
-                formData.append('categoria_id', document.getElementById('eq_categoria_id').value);
-                formData.append('marca', document.getElementById('eq_marca').value);
-                formData.append('modelo', document.getElementById('eq_modelo').value);
-                formData.append('imei_1', document.getElementById('eq_imei1').value || '');
-                formData.append('imei_2', document.getElementById('eq_imei2').value || '');
-                formData.append('especificacoes', document.getElementById('eq_especificacoes').value || '');
-                formData.append('perifericos', document.getElementById('eq_perifericos').value || '');
-                formData.append('status', status);
-
-                formData.append('usuarios_ids', JSON.stringify(usuariosIds));
-
-                const pdfInput = document.getElementById('eq_termo_pdf');
-                if (pdfInput && pdfInput.files[0]) {
-                    formData.append('termo_pdf', pdfInput.files[0]);
-                }
+                const payload = {
+                    numero_patrimonio: document.getElementById('eq_patrimonio').value,
+                    numero_serie: document.getElementById('eq_serie').value,
+                    categoria_id: document.getElementById('eq_categoria_id').value,
+                    marca: document.getElementById('eq_marca').value,
+                    modelo: document.getElementById('eq_modelo').value,
+                    imei_1: document.getElementById('eq_imei1').value || '',
+                    imei_2: document.getElementById('eq_imei2').value || '',
+                    especificacoes: document.getElementById('eq_especificacoes').value || '',
+                    perifericos: document.getElementById('eq_perifericos').value || '',
+                    status: status,
+                    termo_url: document.getElementById('eq_termo_url').value || '',
+                    usuarios_ids: usuariosIds
+                };
 
                 try {
                     const res = await fetch('/api/equipamentos', {
                         method: 'POST',
-                        body: formData
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
-
                     const data = await res.json();
                     if (data.success) {
                         alert('Equipamento cadastrado com sucesso!');
-
                         e.target.reset();
                         checkboxes.forEach(cb => cb.checked = false);
-
-                        if (typeof tratarMudancaStatus === 'function') {
-                            tratarMudancaStatus();
-                        }
+                        tratarMudancaStatus();
                         carregarEquipamentos();
                     } else {
                         alert('Erro ao cadastrar: ' + data.error);
@@ -853,24 +746,21 @@
 
             async function salvarLinha(e) {
                 e.preventDefault();
-
-                const formData = new FormData();
-                formData.append('numero_linha', document.getElementById('lin_numero').value);
-                formData.append('operadora', document.getElementById('lin_operadora').value);
-                formData.append('iccid_chip', document.getElementById('lin_iccid').value);
-                formData.append('plano', document.getElementById('lin_plano').value);
-                formData.append('status', document.getElementById('lin_status').value);
-                formData.append('usuario_id', document.getElementById('lin_usuario_id').value || '');
-
-                const pdfInput = document.getElementById('lin_termo_pdf');
-                if (pdfInput.files[0]) {
-                    formData.append('termo_pdf', pdfInput.files[0]);
-                }
+                const payload = {
+                    numero_linha: document.getElementById('lin_numero').value,
+                    operadora: document.getElementById('lin_operadora').value,
+                    iccid_chip: document.getElementById('lin_iccid').value || '',
+                    plano: document.getElementById('lin_plano').value || '',
+                    status: document.getElementById('lin_status').value,
+                    usuario_id: document.getElementById('lin_usuario_id').value || null,
+                    termo_url: document.getElementById('lin_termo_url').value || ''
+                };
 
                 try {
                     const res = await fetch('/api/linhas', {
                         method: 'POST',
-                        body: formData
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
                     });
                     const data = await res.json();
                     if (data.success) {
@@ -890,7 +780,6 @@
                     const res = await fetch('/api/relatorio/auditoria');
                     const dados = await res.json();
 
-                    // 1. Valida se o backend retornou erro ou uma estrutura diferente de Array
                     if (!res.ok || !Array.isArray(dados)) {
                         throw new Error(dados.error || dados.message || 'A resposta do servidor não é uma lista válida.');
                     }
@@ -900,12 +789,10 @@
                         return;
                     }
 
-                    // \uFEFF adiciona a assinatura UTF-8 para o Excel abrir com acentuação correta
                     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
                     csvContent += "ID Usuario;Nome Usuario;Matricula;Departamento;Qtd Equipamentos;Qtd Linhas;Equipamentos Associados;Linhas Associadas\n";
 
                     dados.forEach(u => {
-                        // 2. Garante que equipamentos e linhas são Arrays válidos mesmo se vierem undefined do backend
                         const equipamentos = Array.isArray(u.equipamentos) ? u.equipamentos : [];
                         const linhas = Array.isArray(u.linhas) ? u.linhas : [];
 
@@ -939,11 +826,6 @@
                     alert('Erro ao gerar relatório: ' + err.message);
                 }
             }
-
-
-
-
-
         </script>
 </body>
 

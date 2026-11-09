@@ -1,9 +1,7 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 
@@ -12,40 +10,25 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public')); // Serve os arquivos do frontend na pasta public
 
-// Configuração da pasta de Uploads para os Termos
-const uploadDir = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Configuração do Multer (Armazenamento de PDFs/Imagens)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'termo-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-const upload = multer({ storage });
-
-// Servir os arquivos enviados publicamente
-app.use('/uploads', express.static(uploadDir));
-
-// Configuração de conexão com o PostgreSQL
+// Configuração de conexão com o PostgreSQL no Servidor Atual (10.64.10.100)
 const pool = new Pool({
-  host: '10.64.10.100',      // Seu IP
+  host: '10.64.10.100',      // IP mantido do seu servidor
   user: 'postgres',           // Seu usuário
   password: '123456*p',      // Sua senha
-  database: 'postgres',       // Nome da Database real
-  port: 5432,                 // Sua porta[cite: 19]
-  options: '-c search_path="Inventario",public' // Adicionadas aspas duplas no schema
+  database: 'postgres',       // Nome da Database
+  port: 5432,                 // Porta 5432
+  options: '-c search_path="Inventario",public' // Schema Inventario como padrão
+});
+
+// Tratamento global para erros do Pool para evitar quedas da aplicação
+pool.on('error', (err) => {
+  console.error('Erro inesperado no pool de conexões do Postgres:', err);
 });
 
 // ==========================================
 // ROTAS DE DEPARTAMENTOS E CATEGORIAS
 // ==========================================
 
-// GET: Departamentos
 app.get('/api/departamentos', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM departamentos ORDER BY nome ASC');
@@ -55,7 +38,6 @@ app.get('/api/departamentos', async (req, res) => {
   }
 });
 
-// GET: Categorias
 app.get('/api/categorias', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM categorias ORDER BY nome ASC');
@@ -69,7 +51,6 @@ app.get('/api/categorias', async (req, res) => {
 // ROTAS DE USUÁRIOS
 // ==========================================
 
-// GET: Listar Usuários (Ordenados por nome de A a Z)
 app.get('/api/usuarios', async (req, res) => {
   try {
     const query = `
@@ -86,18 +67,15 @@ app.get('/api/usuarios', async (req, res) => {
   }
 });
 
-// POST: Cadastrar Usuário
 app.post('/api/usuarios', async (req, res) => {
   try {
     const { nome, email, cargo, matricula, departamento_id, localidade, status } = req.body;
-
     const query = `
       INSERT INTO usuarios (nome, email, cargo, matricula, departamento_id, localidade, status)
       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;
     `;
     const values = [nome, email, cargo, matricula, departamento_id, localidade, status || 'Ativo'];
     const result = await pool.query(query, values);
-
     res.json({ success: true, usuario: result.rows[0] });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -105,8 +83,9 @@ app.post('/api/usuarios', async (req, res) => {
 });
 
 // ==========================================
-// ROTAS DE EQUIPAMENTOS
+// ROTAS DE EQUIPAMENTOS (Agora recebendo termo_url via JSON/String)
 // ==========================================
+
 app.get('/api/equipamentos', async (req, res) => {
   try {
     const query = `
@@ -143,24 +122,20 @@ app.get('/api/equipamentos', async (req, res) => {
   }
 });
 
-// POST: Cadastrar Equipamento com Suporte a Múltiplos Usuários
-
-app.post('/api/equipamentos', upload.single('termo_pdf'), async (req, res) => {
+app.post('/api/equipamentos', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
     const {
       numero_patrimonio, numero_serie, categoria_id, marca,
-      modelo, imei_1, imei_2, especificacoes, perifericos, status, usuarios_ids
+      modelo, imei_1, imei_2, especificacoes, perifericos, status, termo_url, usuarios_ids
     } = req.body;
 
-    const termo_url = req.file ? `/uploads/${req.file.filename}` : null;
     const listaUsuarios = Array.isArray(usuarios_ids)
       ? usuarios_ids
       : (usuarios_ids ? JSON.parse(usuarios_ids) : []);
 
-    // Insere o equipamento
     const insertEq = `
       INSERT INTO equipamentos 
       (numero_patrimonio, numero_serie, categoria_id, marca, modelo, imei_1, imei_2, especificacoes, perifericos, status, termo_url)
@@ -170,19 +145,11 @@ app.post('/api/equipamentos', upload.single('termo_pdf'), async (req, res) => {
     const result = await client.query(insertEq, [
       numero_patrimonio, numero_serie, categoria_id ? parseInt(categoria_id) : null,
       marca, modelo, imei_1 || null, imei_2 || null, especificacoes || null,
-      perifericos || null, status, termo_url
+      perifericos || null, status, termo_url || null
     ]);
-
-    const porTipo = await pool.query(`
-  SELECT COALESCE(c.nome, 'Sem Categoria') AS tipo, COUNT(e.id) AS quantidade
-  FROM equipamentos e
-  LEFT JOIN categorias c ON e.categoria_id = c.id
-  GROUP BY c.nome
-`);
 
     const equipamentoId = result.rows[0].id;
 
-    // Vincula todos os jovens aprendizes selecionados
     if (listaUsuarios.length > 0 && status === 'Em Uso') {
       for (const usrId of listaUsuarios) {
         await client.query(
@@ -202,11 +169,11 @@ app.post('/api/equipamentos', upload.single('termo_pdf'), async (req, res) => {
     client.release();
   }
 });
+
 // ==========================================
 // ROTA DO DASHBOARD / ESTATÍSTICAS
 // ==========================================
 
-// --- ROTA DE ESTATÍSTICAS DO DASHBOARD (ATUALIZADA) ---
 app.get('/api/dashboard/estatisticas', async (req, res) => {
   try {
     const totalEq = await pool.query('SELECT COUNT(*) FROM equipamentos');
@@ -214,11 +181,9 @@ app.get('/api/dashboard/estatisticas', async (req, res) => {
     const eqEstoque = await pool.query("SELECT COUNT(*) FROM equipamentos WHERE status IN ('Backup', 'Estoque')");
     const totalUsr = await pool.query('SELECT COUNT(*) FROM usuarios');
 
-    // Novas estatísticas de Telefonia
     const totalLinhas = await pool.query('SELECT COUNT(*) FROM linhas_telefonicas');
     const linhasEmUso = await pool.query("SELECT COUNT(*) FROM linhas_telefonicas WHERE status = 'Em Uso'");
 
-    // Estatísticas de Smartphones/Celulares
     const totalSmartphones = await pool.query(`
       SELECT COUNT(*) FROM equipamentos e
       JOIN categorias c ON e.categoria_id = c.id
@@ -246,7 +211,7 @@ app.get('/api/dashboard/estatisticas', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// --- ROTA DO RELATÓRIO DE AUDITORIA COMPILADO POR USUÁRIO ---
+
 app.get('/api/relatorio/auditoria', async (req, res) => {
   try {
     const query = `
@@ -288,8 +253,10 @@ app.get('/api/relatorio/auditoria', async (req, res) => {
   }
 });
 
+// ==========================================
+// ROTAS DE LINHAS TELEFÔNICAS
+// ==========================================
 
-// Listar Linhas
 app.get('/api/linhas', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -306,10 +273,8 @@ app.get('/api/linhas', async (req, res) => {
   }
 });
 
-// Cadastrar Nova Linha
-app.post('/api/linhas', upload.single('termo_pdf'), async (req, res) => {
-  const { numero_linha, operadora, iccid_chip, plano, status, usuario_id, observacoes } = req.body;
-  const termo_url = req.file ? `/uploads/${req.file.filename}` : (req.body.termo_url || null);
+app.post('/api/linhas', async (req, res) => {
+  const { numero_linha, operadora, iccid_chip, plano, status, usuario_id, termo_url, observacoes } = req.body;
 
   try {
     const query = `
@@ -324,8 +289,8 @@ app.post('/api/linhas', upload.single('termo_pdf'), async (req, res) => {
       plano,
       status || 'Em Uso',
       usuario_id ? parseInt(usuario_id) : null,
-      termo_url,
-      observacoes
+      termo_url || null,
+      observacoes || null
     ];
     await pool.query(query, values);
     res.json({ success: true });
@@ -335,12 +300,11 @@ app.post('/api/linhas', upload.single('termo_pdf'), async (req, res) => {
 });
 
 // ==========================================
-// INICIALIZAÇÃO DO SERVIDOR NA REDE
+// INICIALIZAÇÃO DO SERVIDOR NA REDE (10.64.10.100)
 // ==========================================
 
 const PORT = process.env.PORT || 3000;
 
-// O IP '0.0.0.0' permite conexões de qualquer máquina da rede local
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`===================================================`);
   console.log(`Servidor rodando localmente em: http://localhost:${PORT}`);
