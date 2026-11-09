@@ -15,6 +15,7 @@ const pool = new Pool({
   host: '10.64.10.100',      // IP mantido do seu servidor
   user: 'postgres',           // Seu usuário
   password: '123456*p',      // Sua senha
+<<<<<<< HEAD
   database: 'postgres',       // Nome da Database
   port: 5432,                 // Porta 5432
   options: '-c search_path="Inventario",public' // Schema Inventario como padrão
@@ -23,6 +24,15 @@ const pool = new Pool({
 // Tratamento global para erros do Pool para evitar quedas da aplicação
 pool.on('error', (err) => {
   console.error('Erro inesperado no pool de conexões do Postgres:', err);
+=======
+  database: 'postgres',       // Nome da Database real
+  port: 5432                  // Sua porta
+});
+
+// Define o schema padrão automaticamente a cada conexão do pool
+pool.on('connect', (client) => {
+  client.query('SET search_path TO "Inventario", public;');
+>>>>>>> 28e453b4c4beac76af6888f6bce6bdf13a118f50
 });
 
 // ==========================================
@@ -89,31 +99,31 @@ app.post('/api/usuarios', async (req, res) => {
 app.get('/api/equipamentos', async (req, res) => {
   try {
     const query = `
-            SELECT 
-                e.id,
-                e.numero_patrimonio,
-                e.numero_serie,
-                e.marca,
-                e.modelo,
-                e.especificacoes,
-                e.perifericos,
-                e.status,
-                e.termo_url,
-                e.categoria_id,
-                c.nome AS categoria_nome,
-                COALESCE(
-                    (
-                        SELECT array_to_string(array_agg(u.nome), ', ')
-                        FROM equipamento_usuarios eu
-                        JOIN usuarios u ON u.id = eu.usuario_id
-                        WHERE eu.equipamento_id = e.id
-                    ),
-                    'Em Estoque'
-                ) AS usuario_nome
-            FROM equipamentos e
-            LEFT JOIN categorias c ON e.categoria_id = c.id
-            ORDER BY e.id DESC;
-        `;
+      SELECT 
+        e.id,
+        e.numero_patrimonio,
+        e.numero_serie,
+        e.marca,
+        e.modelo,
+        e.especificacoes,
+        e.perifericos,
+        e.status,
+        e.termo_url,
+        e.categoria_id,
+        c.nome AS categoria_nome,
+        COALESCE(
+          (
+            SELECT array_to_string(array_agg(u.nome), ', ')
+            FROM equipamento_usuarios eu
+            JOIN usuarios u ON u.id = eu.usuario_id
+            WHERE eu.equipamento_id = e.id
+          ),
+          'Em Estoque'
+        ) AS usuario_nome
+      FROM equipamentos e
+      LEFT JOIN categorias c ON e.categoria_id = c.id
+      ORDER BY e.id DESC;
+    `;
     const result = await pool.query(query);
     res.json(result.rows);
   } catch (err) {
@@ -122,7 +132,12 @@ app.get('/api/equipamentos', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 app.post('/api/equipamentos', async (req, res) => {
+=======
+// POST: Cadastrar Equipamento com Suporte a Múltiplos Usuários
+app.post('/api/equipamentos', upload.single('termo_pdf'), async (req, res) => {
+>>>>>>> 28e453b4c4beac76af6888f6bce6bdf13a118f50
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -150,6 +165,10 @@ app.post('/api/equipamentos', async (req, res) => {
 
     const equipamentoId = result.rows[0].id;
 
+<<<<<<< HEAD
+=======
+    // Vincula todos os usuários/jovens aprendizes selecionados
+>>>>>>> 28e453b4c4beac76af6888f6bce6bdf13a118f50
     if (listaUsuarios.length > 0 && status === 'Em Uso') {
       for (const usrId of listaUsuarios) {
         await client.query(
@@ -181,6 +200,10 @@ app.get('/api/dashboard/estatisticas', async (req, res) => {
     const eqEstoque = await pool.query("SELECT COUNT(*) FROM equipamentos WHERE status IN ('Backup', 'Estoque')");
     const totalUsr = await pool.query('SELECT COUNT(*) FROM usuarios');
 
+<<<<<<< HEAD
+=======
+    // Estatísticas de Telefonia
+>>>>>>> 28e453b4c4beac76af6888f6bce6bdf13a118f50
     const totalLinhas = await pool.query('SELECT COUNT(*) FROM linhas_telefonicas');
     const linhasEmUso = await pool.query("SELECT COUNT(*) FROM linhas_telefonicas WHERE status = 'Em Uso'");
 
@@ -191,7 +214,7 @@ app.get('/api/dashboard/estatisticas', async (req, res) => {
     `);
 
     const porTipo = await pool.query(`
-      SELECT c.nome AS tipo, COUNT(e.id) AS quantidade
+      SELECT COALESCE(c.nome, 'Sem Categoria') AS tipo, COUNT(e.id) AS quantidade
       FROM equipamentos e
       LEFT JOIN categorias c ON e.categoria_id = c.id
       GROUP BY c.nome
@@ -212,6 +235,10 @@ app.get('/api/dashboard/estatisticas', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
+=======
+// --- ROTA DO RELATÓRIO DE AUDITORIA COMPILADO POR USUÁRIO ---
+>>>>>>> 28e453b4c4beac76af6888f6bce6bdf13a118f50
 app.get('/api/relatorio/auditoria', async (req, res) => {
   try {
     const query = `
@@ -303,7 +330,7 @@ app.post('/api/linhas', async (req, res) => {
 // INICIALIZAÇÃO DO SERVIDOR NA REDE (10.64.10.100)
 // ==========================================
 
-const PORT = process.env.PORT || 8080; // Alterado para 8080 para manter o padrão atual da URL
+const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`===================================================`);
