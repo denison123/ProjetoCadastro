@@ -303,7 +303,7 @@ app.post('/api/linhas', async (req, res) => {
 // INICIALIZAÇÃO DO SERVIDOR NA REDE (10.64.10.100)
 // ==========================================
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080; // Alterado para 8080 para manter o padrão atual da URL
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`===================================================`);
